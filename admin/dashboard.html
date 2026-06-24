@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en-CA" data-lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassTrack — Board Admin · Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root{--c-bg:#F0F2F7;--c-surface:#FFFFFF;--c-surface-2:#F8FAFC;--c-surface-alt:#EEF2F7;--c-sidebar:#0F2546;--c-sidebar-2:#0A1B36;--c-sidebar-hover:rgba(255,255,255,0.08);--c-sidebar-active:#1B5DAF;--c-border:#D6DBE2;--c-border-2:#E5E8EE;--c-border-strong:#A6ADBB;--c-ink:#0F2546;--c-ink-muted:#475467;--c-ink-subtle:#5C6470;--c-brand:#1B5DAF;--c-brand-ink:#0E2E55;--c-brand-tint:#E8F0FA;--c-success:#1F7A3F;--c-success-tint:#E6F4EC;--c-warning:#9A4708;--c-warning-tint:#FCF1DD;--c-warning-bord:#B97F38;--c-danger:#B42318;--c-danger-tint:#FCE9E7;--c-info:#0E5C8A;--c-info-tint:#E0EFF7;--c-neutral-tint:#EEF1F5;--c-purple-tint:#EEEAFE;--c-purple:#3F22A6;--c-focus:#FFB400;--ff:"Segoe UI",system-ui,-apple-system,sans-serif;--shadow-sm:0 1px 3px rgba(15,37,70,0.06);--shadow-md:0 4px 12px rgba(15,37,70,0.08);--shadow-lg:0 8px 28px rgba(15,37,70,0.12);}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html,body{height:100%;}
+  body{font-family:var(--ff);background:var(--c-bg);color:var(--c-ink);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;}
+  a{color:var(--c-brand);text-decoration:none;}a:hover{text-decoration:underline;}button{font-family:inherit;cursor:pointer;}
+  .skip-link{position:absolute;top:-40px;left:12px;background:var(--c-focus);color:#5C3F00;padding:8px 12px;border-radius:6px;font-weight:600;z-index:200;text-decoration:none;}.skip-link:focus{top:8px;}
+
+  /* WF Banner — purple tint distinguishes Admin from Clerk (yellow) */
+  .wf-banner{background:#F0EFFE;border-bottom:1px solid #C8C0F0;color:#3F22A6;font-size:12px;padding:6px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .wf-banner__left{display:flex;align-items:center;gap:8px;}
+  .wf-banner__right{display:flex;align-items:center;gap:12px;}
+  .wf-banner a{color:#3F22A6;}
+
+  /* Layout */
+  .app{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 32px);}
+
+  /* Sidebar */
+  .sidebar{background:linear-gradient(180deg,var(--c-sidebar) 0%,var(--c-sidebar-2) 100%);color:rgba(255,255,255,0.85);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .sidebar__logo{padding:24px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .sidebar__logo-mark{width:36px;height:36px;background:var(--c-sidebar-active);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px;}
+  .sidebar__logo-text{color:#fff;font-size:16px;font-weight:700;}
+  .sidebar__logo-sub{color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;}
+  .sidebar__role-badge{margin:8px 16px 0;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:999px;padding:3px 10px;font-size:10px;font-weight:700;color:rgba(255,255,255,0.9);letter-spacing:0.06em;text-transform:uppercase;text-align:center;}
+  .sidebar__section{padding:16px 12px 4px;}
+  .sidebar__section-label{text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.45);padding:0 12px;margin-bottom:4px;}
+  .nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;color:rgba(255,255,255,0.78);font-size:13px;font-weight:500;min-height:36px;text-decoration:none;}
+  .nav-item:hover{background:var(--c-sidebar-hover);color:#fff;text-decoration:none;}
+  .nav-item.is-active{background:var(--c-sidebar-active);color:#fff;font-weight:600;}
+  .nav-item .nav-icon{width:20px;text-align:center;font-size:14px;}
+  .nav-item .nav-badge{margin-left:auto;background:var(--c-danger);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;}
+  .nav-item .nav-badge--neutral{background:rgba(255,255,255,0.18);color:#fff;}
+  .nav-item .nav-badge--warn{background:var(--c-warning);color:#fff;}
+  .sidebar__user{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:12px;}
+  .avatar{width:36px;height:36px;border-radius:999px;background:var(--c-brand-tint);color:var(--c-brand-ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;}
+  .sidebar__user-name{color:#fff;font-size:13px;font-weight:600;}
+  .sidebar__user-role{color:rgba(255,255,255,0.6);font-size:11px;}
+
+  /* Topbar */
+  .main{display:flex;flex-direction:column;min-width:0;}
+  .topbar{background:var(--c-surface);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:16px;padding:0 24px;position:sticky;top:0;z-index:50;min-height:64px;}
+  .topbar__left{display:flex;flex-direction:column;gap:2px;}
+  .topbar__title{font-size:15px;font-weight:700;color:var(--c-ink);}
+  .topbar__date{font-size:12px;color:var(--c-ink-subtle);}
+  .topbar__scope{background:var(--c-purple-tint);color:var(--c-purple);border:1px solid #C8C0F0;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px;margin-left:auto;}
+  .topbar__actions{display:flex;align-items:center;gap:8px;}
+  .icon-btn{width:36px;height:36px;border-radius:6px;background:transparent;border:none;color:var(--c-ink-muted);display:inline-flex;align-items:center;justify-content:center;position:relative;font-size:14px;cursor:pointer;}
+  .icon-btn:hover{background:var(--c-surface-alt);}
+  .icon-btn__count{position:absolute;top:2px;right:2px;background:var(--c-danger);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:999px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--c-surface);}
+  .lang-toggle{display:inline-flex;border:1px solid var(--c-border-strong);border-radius:6px;overflow:hidden;}
+  .lang-toggle button{background:var(--c-surface);border:0;padding:6px 12px;font-size:12px;font-weight:700;color:var(--c-ink-muted);min-height:32px;}
+  .lang-toggle button[aria-pressed="true"]{background:var(--c-brand);color:#fff;}
+  .user-chip{display:inline-flex;align-items:center;gap:8px;padding:4px 10px 4px 4px;border:1px solid var(--c-border);border-radius:999px;font-size:12px;color:var(--c-ink-muted);min-height:36px;}
+
+  /* Aspen sync bar */
+  .sync-bar{background:var(--c-surface);border-bottom:1px solid var(--c-border);padding:6px 24px;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--c-ink-subtle);}
+  .sync-bar__dot{width:8px;height:8px;border-radius:50%;background:var(--c-success);flex-shrink:0;box-shadow:0 0 0 3px var(--c-success-tint);}
+  .sync-bar__dot--warn{background:var(--c-warning);box-shadow:0 0 0 3px var(--c-warning-tint);}
+  .sync-bar__issue{color:var(--c-warning);font-weight:600;}
+
+  /* Content */
+  .content{padding:24px;flex:1;display:flex;flex-direction:column;gap:20px;}
+
+  /* --- Headline metric row --- */
+  .headline-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .headline-card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:12px;padding:20px 24px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;}
+  .headline-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:12px 0 0 12px;}
+  .headline-card--alert::before{background:var(--c-danger);}
+  .headline-card--warn::before{background:var(--c-warning);}
+  .headline-card--ok::before{background:var(--c-success);}
+  .headline-card__label{font-size:12px;font-weight:700;color:var(--c-ink-muted);text-transform:uppercase;letter-spacing:0.06em;display:flex;align-items:center;gap:8px;}
+  .headline-card__number{font-size:48px;font-weight:800;line-height:1;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;}
+  .headline-card--alert .headline-card__number{color:var(--c-danger);}
+  .headline-card--warn .headline-card__number{color:var(--c-warning);}
+  .headline-card--ok .headline-card__number{color:var(--c-success);}
+  .headline-card__sub{font-size:12px;color:var(--c-ink-subtle);}
+  .headline-card__trend{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;margin-top:auto;}
+  .trend--up-bad{color:var(--c-danger);}
+  .trend--down-good{color:var(--c-success);}
+  .trend--stable{color:var(--c-ink-subtle);}
+
+  /* --- Two-column body --- */
+  .body-grid{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;}
+
+  /* Card generic */
+  .card{background:var(--c-surface);border:1px solid var(--c-border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+  .card__h{padding:14px 18px;border-bottom:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .card__title{font-size:14px;font-weight:700;color:var(--c-ink);display:flex;align-items:center;gap:8px;}
+  .card__sub{font-size:12px;color:var(--c-ink-subtle);margin-top:2px;}
+  .card__footer{padding:8px 16px;background:var(--c-surface-2);border-top:1px solid var(--c-border-2);display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--c-ink-subtle);}
+
+  /* School performance list */
+  .school-list{display:flex;flex-direction:column;}
+  .school-row{display:grid;grid-template-columns:1fr 90px 160px 90px;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--c-border-2);}
+  .school-row:last-child{border-bottom:0;}
+  .school-row:hover{background:var(--c-surface-2);}
+  .school-row--header{background:var(--c-surface-2);border-bottom:2px solid var(--c-border);}
+  .school-row--header span{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--c-ink-muted);}
+  .school-name{font-weight:600;font-size:13px;color:var(--c-ink);}
+
+  /* Rate bar */
+  .rate-bar{display:flex;align-items:center;gap:8px;}
+  .rate-track{flex:1;height:6px;background:var(--c-surface-alt);border-radius:999px;overflow:hidden;}
+  .rate-fill{height:100%;border-radius:999px;}
+  .rate-fill--ok{background:var(--c-success);}
+  .rate-fill--warn{background:var(--c-warning);}
+  .rate-fill--alert{background:var(--c-danger);}
+  .rate-pct{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;min-width:40px;text-align:right;}
+  .rate-pct--ok{color:var(--c-success);}
+  .rate-pct--warn{color:var(--c-warning);}
+  .rate-pct--alert{color:var(--c-danger);}
+
+  /* Status chip */
+  .chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid transparent;}
+  .chip--ok{background:var(--c-success-tint);color:var(--c-success);border-color:#4F9A6C;}
+  .chip--warn{background:var(--c-warning-tint);color:var(--c-warning);border-color:var(--c-warning-bord);}
+  .chip--alert{background:var(--c-danger-tint);color:var(--c-danger);border-color:#B0625A;}
+  .chip--neutral{background:var(--c-neutral-tint);color:var(--c-ink-muted);border-color:var(--c-border-strong);}
+  .chip--board{background:var(--c-purple-tint);color:var(--c-purple);border-color:#7E68DC;}
+
+  /* Right column */
+  .side-col{display:flex;flex-direction:column;gap:16px;}
+
+  /* Compliance dial */
+  .compliance-body{padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+  .compliance-dial{text-align:center;padding:8px 0;}
+  .dial-ring{display:inline-block;position:relative;width:100px;height:100px;}
+  .dial-ring svg{transform:rotate(-90deg);}
+  .dial-ring__track{stroke:var(--c-surface-alt);stroke-width:10;fill:none;}
+  .dial-ring__fill{stroke:var(--c-warning);stroke-width:10;fill:none;stroke-linecap:round;stroke-dasharray:283;stroke-dashoffset:42;}
+  .dial-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .dial-pct{font-size:20px;font-weight:800;color:var(--c-warning);}
+  .dial-label{font-size:10px;color:var(--c-ink-subtle);}
+  .compliance-breakdown{display:flex;flex-direction:column;gap:6px;}
+  .breakdown-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;}
+  .breakdown-row__dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-right:6px;}
+  .breakdown-row__label{color:var(--c-ink-muted);display:flex;align-items:center;}
+  .breakdown-row__val{font-weight:700;font-variant-numeric:tabular-nums;}
+
+  /* §2.1 risk card */
+  .risk-body{padding:12px 18px;display:flex;flex-direction:column;gap:10px;}
+  .risk-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--c-border-2);}
+  .risk-row:last-child{border-bottom:0;}
+  .risk-school{font-size:13px;font-weight:600;}
+  .risk-sub{font-size:11px;color:var(--c-ink-subtle);}
+  .risk-count{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .risk-count--alert{color:var(--c-danger);}
+  .risk-count--warn{color:var(--c-warning);}
+  .risk-count--ok{color:var(--c-success);}
+
+  /* System alerts */
+  .alert-list{display:flex;flex-direction:column;}
+  .alert-item{display:flex;align-items:flex-start;gap:10px;padding:12px 18px;border-bottom:1px solid var(--c-border-2);font-size:13px;}
+  .alert-item:last-child{border-bottom:0;}
+  .alert-item__icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px;}
+  .alert-item__icon--warn{background:var(--c-warning-tint);color:var(--c-warning);}
+  .alert-item__icon--alert{background:var(--c-danger-tint);color:var(--c-danger);}
+  .alert-item__icon--info{background:var(--c-info-tint);color:var(--c-info);}
+  .alert-item__body{flex:1;}
+  .alert-item__title{font-weight:600;color:var(--c-ink);}
+  .alert-item__sub{font-size:12px;color:var(--c-ink-subtle);margin-top:2px;}
+
+  /* Btn */
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:6px;font-size:13px;font-weight:600;border:1px solid transparent;min-height:34px;cursor:pointer;text-decoration:none;}
+  .btn--ghost{background:transparent;color:var(--c-brand);border:0;}.btn--ghost:hover{background:var(--c-brand-tint);}
+  .btn--secondary{background:var(--c-surface);color:var(--c-ink);border-color:var(--c-border-strong);}.btn--secondary:hover{background:var(--c-surface-alt);}
+  .btn--sm{padding:4px 10px;min-height:28px;font-size:12px;}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="wf-banner" role="region">
+  <div class="wf-banner__left"><i class="fa-solid fa-pencil-ruler"></i><strong>Wireframe — Admin Portal V1 · Dashboard</strong><span>· EC Catholic · Board Admin</span></div>
+  <div class="wf-banner__right"><a href="schools.html">Schools</a><a href="aspen.html">Aspen</a><a href="configuration.html">Config</a><a href="reports.html">Reports</a></div>
+</div>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-mark">CT</div>
+      <div><div class="sidebar__logo-text">ClassTrack</div><div class="sidebar__logo-sub">EC Catholic · Board</div></div>
+    </div>
+    <div class="sidebar__role-badge">Board Administrator</div>
+    <nav class="sidebar__section"><div class="sidebar__section-label">Overview</div><a href="dashboard.html" class="nav-item is-active" aria-current="page"><span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span>Dashboard</a></nav>
+    <nav class="sidebar__section"><div class="sidebar__section-label">Board</div><a href="schools.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-school"></i></span>Schools<span class="nav-badge nav-badge--neutral">8</span></a><a href="users.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-users-gear"></i></span>Users<span class="nav-badge nav-badge--neutral">247</span></a><a href="registered-contacts.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-id-badge"></i></span>Registered Contacts<span class="nav-badge nav-badge--neutral">14</span></a></nav>
+    <nav class="sidebar__section"><div class="sidebar__section-label">Integration</div><a href="aspen.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-arrows-rotate"></i></span>Aspen Sync<span class="nav-badge nav-badge--warn">1</span></a></nav>
+    <nav class="sidebar__section"><div class="sidebar__section-label">Configuration</div><a href="configuration.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>Calendar &amp; Periods</a><a href="notifications.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-bell-slash"></i></span>Notifications</a></nav>
+    <nav class="sidebar__section"><div class="sidebar__section-label">Reports</div><a href="reports.html" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>Compliance Reports</a><a href="reports.html#audit" class="nav-item"><span class="nav-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>Audit Log</a></nav>
+    <div class="sidebar__user"><div class="avatar">AR</div><div><div class="sidebar__user-name">André Rousseau</div><div class="sidebar__user-role">Board Administrator</div></div></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar__left">
+        <div class="topbar__title">Board Dashboard</div>
+        <div class="topbar__date">Tuesday, June 9, 2026 · Week 36 of 40 · Term 4</div>
+      </div>
+      <div class="topbar__scope"><i class="fa-solid fa-school"></i> EC Catholic · All 8 Schools</div>
+      <div class="topbar__actions">
+        <div class="lang-toggle"><button aria-pressed="true">EN</button><button aria-pressed="false">FR</button></div>
+        <button class="icon-btn" aria-label="Notifications"><i class="fa-solid fa-bell"></i><span class="icon-btn__count">3</span></button>
+        <span class="user-chip"><span class="avatar" style="width:28px;height:28px;font-size:12px;">AR</span>André R. · Board Admin</span>
+      </div>
+    </header>
+
+    <div class="sync-bar">
+      <span class="sync-bar__dot sync-bar__dot--warn"></span>
+      <span>Aspen last synced <strong>6 min ago</strong></span>
+      <span>·</span>
+      <span class="sync-bar__issue"><i class="fa-solid fa-triangle-exclamation"></i> 1 staff record unmatched — D. Park · Saint-Michel</span>
+      <span style="margin-left:auto;"><a href="aspen.html">View sync console →</a></span>
+    </div>
+
+    <main id="main" class="content" tabindex="-1">
+
+      <!-- 3 headline metrics -->
+      <div class="headline-row">
+        <div class="headline-card headline-card--alert">
+          <div class="headline-card__label"><i class="fa-solid fa-school"></i> Schools below 90% target</div>
+          <div class="headline-card__number">2</div>
+          <div class="headline-card__sub">of 8 schools · both secondary</div>
+          <div class="headline-card__trend trend--up-bad"><i class="fa-solid fa-arrow-trend-up"></i> +1 vs last week</div>
+        </div>
+        <div class="headline-card headline-card--warn">
+          <div class="headline-card__label"><i class="fa-solid fa-chalkboard-user"></i> Teacher submission compliance</div>
+          <div class="headline-card__number">85<span style="font-size:28px;font-weight:600;">%</span></div>
+          <div class="headline-card__sub">submitted on time today · 6 overdue</div>
+          <div class="headline-card__trend trend--up-bad"><i class="fa-solid fa-arrow-trend-down"></i> −2pp vs last week</div>
+        </div>
+        <div class="headline-card headline-card--warn">
+          <div class="headline-card__label"><i class="fa-solid fa-chart-line"></i> Students near §2.1 threshold</div>
+          <div class="headline-card__number">23</div>
+          <div class="headline-card__sub">≥ 8% absence rate this term</div>
+          <div class="headline-card__trend trend--stable"><i class="fa-solid fa-minus"></i> Stable vs last week</div>
+        </div>
+      </div>
+
+      <!-- Body: school table + right column -->
+      <div class="body-grid">
+
+        <!-- School attendance rates -->
+        <div class="card">
+          <div class="card__h">
+            <div>
+              <div class="card__title"><i class="fa-solid fa-school" style="color:var(--c-brand);font-size:13px;"></i> School Attendance Rates — Term 4</div>
+              <div class="card__sub">Target: ≥ 90% · sorted by rate · 4 elementary, 4 secondary</div>
+            </div>
+            <a href="reports.html" class="btn btn--secondary btn--sm"><i class="fa-solid fa-file-export"></i> Export</a>
+          </div>
+          <div class="school-list">
+            <div class="school-row school-row--header">
+              <span>School</span><span>Type</span><span>Rate (term 4)</span><span>Status</span>
+            </div>
+            <div class="school-row">
+              <div><div class="school-name">École Notre-Dame</div></div>
+              <div><span class="chip chip--neutral">Elementary</span></div>
+              <div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:96.8%;"></div></div><span class="rate-pct rate-pct--ok">96.8%</span></div>
+              <div><span class="chip chip--ok"><i class="fa-solid fa-circle-check"></i> On target</span></div>
+            </div>
+            <div class="school-row">
+              <div><div class="school-name">École Sainte-Croix</div></div>
+              <div><span class="chip chip--neutral">Elementary</span></div>
+              <div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:95.2%;"></div></div><span class="rate-pct rate-pct--ok">95.2%</span></div>
+              <div><span class="chip chip--ok"><i class="fa-solid fa-circle-check"></i> On target</span></div>
+            </div>
+            <div class="school-row">
+              <div><div class="school-name">École Saint-Joseph</div></div>
+              <div><span class="chip chip--neutral">Elementary</span></div>
+              <div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:93.5%;"></div></div><span class="rate-pct rate-pct--ok">93.5%</span></div>
+              <div><span class="chip chip--ok"><i class="fa-solid fa-circle-check"></i> On target</span></div>
+            </div>
+            <div class="school-row">
+              <div><div class="school-name">École Saint-Luc</div></div>
+              <div><span class="chip chip--neutral">Elementary</span></div>
+              <div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:92.1%;"></div></div><span class="rate-pct rate-pct--ok">92.1%</span></div>
+              <div><span class="chip chip--ok"><i class="fa-solid fa-circle-check"></i> On target</span></div>
+            </div>
+            <div class="school-row">
+              <div><div class="school-name">École sec. Saint-Michel</div></div>
+              <div><span class="chip chip--board">Secondary</span></div>
+              <div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:91.4%;"></div></div><span class="rate-pct rate-pct--ok">91.4%</span></div>
+              <div><span class="chip chip--ok"><i class="fa-solid fa-circle-check"></i> On target</span></div>
+            </div>
+            <div class="school-row">
+              <div><div class="school-name">École sec. Sainte-Marie</div></div>
+              <div><span class="chip chip--board">Secondary</span></div>
+              <div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--ok" style="width:90.8%;"></div></div><span class="rate-pct rate-pct--ok">90.8%</span></div>
+              <div><span class="chip chip--ok"><i class="fa-solid fa-circle-check"></i> On target</span></div>
+            </div>
+            <div class="school-row" style="background:#FFFAF5;">
+              <div><div class="school-name">École sec. du Carrefour</div></div>
+              <div><span class="chip chip--board">Secondary</span></div>
+              <div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--warn" style="width:87.3%;"></div></div><span class="rate-pct rate-pct--warn">87.3%</span></div>
+              <div><span class="chip chip--warn"><i class="fa-solid fa-triangle-exclamation"></i> Below target</span></div>
+            </div>
+            <div class="school-row" style="background:#FFF5F4;">
+              <div><div class="school-name">École sec. de l'Avenir</div></div>
+              <div><span class="chip chip--board">Secondary</span></div>
+              <div class="rate-bar"><div class="rate-track"><div class="rate-fill rate-fill--alert" style="width:84.1%;"></div></div><span class="rate-pct rate-pct--alert">84.1%</span></div>
+              <div><span class="chip chip--alert"><i class="fa-solid fa-circle-exclamation"></i> Below target</span></div>
+            </div>
+          </div>
+          <div class="card__footer">
+            <span>Board average: <strong>91.4%</strong> · Elementary avg: <strong>94.4%</strong> · Secondary avg: <strong>88.9%</strong></span>
+            <a href="reports.html" class="btn btn--ghost btn--sm">Full compliance report →</a>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="side-col">
+
+          <!-- Teacher submission compliance -->
+          <div class="card">
+            <div class="card__h">
+              <div>
+                <div class="card__title"><i class="fa-solid fa-chalkboard-user" style="color:var(--c-warning);font-size:13px;"></i> Submission Compliance</div>
+                <div class="card__sub">Today · all periods across all schools</div>
+              </div>
+            </div>
+            <div class="compliance-body">
+              <div class="compliance-dial">
+                <div class="dial-ring">
+                  <svg width="100" height="100" viewBox="0 0 100 100">
+                    <circle class="dial-ring__track" cx="50" cy="50" r="45"/>
+                    <circle class="dial-ring__fill" cx="50" cy="50" r="45"/>
+                  </svg>
+                  <div class="dial-center">
+                    <div class="dial-pct">85%</div>
+                    <div class="dial-label">on time</div>
+                  </div>
+                </div>
+              </div>
+              <div class="compliance-breakdown">
+                <div class="breakdown-row">
+                  <div class="breakdown-row__label"><span class="breakdown-row__dot" style="background:var(--c-success);"></span>Submitted on time</div>
+                  <div class="breakdown-row__val" style="color:var(--c-success);">34</div>
+                </div>
+                <div class="breakdown-row">
+                  <div class="breakdown-row__label"><span class="breakdown-row__dot" style="background:var(--c-warning);"></span>Overdue (&lt;30 min)</div>
+                  <div class="breakdown-row__val" style="color:var(--c-warning);">4</div>
+                </div>
+                <div class="breakdown-row">
+                  <div class="breakdown-row__label"><span class="breakdown-row__dot" style="background:var(--c-danger);"></span>Missing</div>
+                  <div class="breakdown-row__val" style="color:var(--c-danger);">2</div>
+                </div>
+              </div>
+            </div>
+            <div class="card__footer"><span>Missing: l'Avenir (2 teachers · P2)</span><a href="reports.html" class="btn btn--ghost btn--sm">Details →</a></div>
+          </div>
+
+          <!-- §2.1 Risk by school -->
+          <div class="card">
+            <div class="card__h">
+              <div>
+                <div class="card__title"><i class="fa-solid fa-chart-line" style="color:var(--c-purple);font-size:13px;"></i> §2.1 Risk by School</div>
+                <div class="card__sub">Students ≥ 8% absence rate this term</div>
+              </div>
+              <span class="chip chip--board" style="font-size:10px;">Phase 2</span>
+            </div>
+            <div class="risk-body">
+              <div class="risk-row">
+                <div><div class="risk-school">École sec. de l'Avenir</div><div class="risk-sub">Secondary · Gr 9–12</div></div>
+                <div class="risk-count risk-count--alert">9</div>
+              </div>
+              <div class="risk-row">
+                <div><div class="risk-school">École sec. du Carrefour</div><div class="risk-sub">Secondary · Gr 9–12</div></div>
+                <div class="risk-count risk-count--warn">7</div>
+              </div>
+              <div class="risk-row">
+                <div><div class="risk-school">École sec. Saint-Michel</div><div class="risk-sub">Secondary · Gr 9–12</div></div>
+                <div class="risk-count risk-count--warn">5</div>
+              </div>
+              <div class="risk-row">
+                <div><div class="risk-school">All other schools</div><div class="risk-sub">Elementary + 1 secondary</div></div>
+                <div class="risk-count risk-count--ok">2</div>
+              </div>
+            </div>
+            <div class="card__footer"><span>23 students total</span><a href="reports.html#threshold" class="btn btn--ghost btn--sm">View all →</a></div>
+          </div>
+
+          <!-- System alerts -->
+          <div class="card">
+            <div class="card__h">
+              <div class="card__title">
+                <i class="fa-solid fa-bell" style="color:var(--c-ink-muted);font-size:13px;"></i> System Alerts
+                <span style="background:var(--c-danger);color:#fff;padding:2px 7px;border-radius:999px;font-size:11px;">3</span>
+              </div>
+            </div>
+            <div class="alert-list">
+              <div class="alert-item">
+                <div class="alert-item__icon alert-item__icon--alert"><i class="fa-solid fa-arrows-rotate"></i></div>
+                <div class="alert-item__body"><div class="alert-item__title">Aspen staff record unmatched</div><div class="alert-item__sub">D. Park · Saint-Michel · action required</div></div>
+                <a href="aspen.html" class="btn btn--ghost btn--sm">Fix</a>
+              </div>
+              <div class="alert-item">
+                <div class="alert-item__icon alert-item__icon--warn"><i class="fa-solid fa-chalkboard-user"></i></div>
+                <div class="alert-item__body"><div class="alert-item__title">2 teachers missing attendance</div><div class="alert-item__sub">l'Avenir · Period 2 · 35 min overdue</div></div>
+                <a href="schools.html" class="btn btn--ghost btn--sm">View</a>
+              </div>
+              <div class="alert-item">
+                <div class="alert-item__icon alert-item__icon--info"><i class="fa-solid fa-calendar-days"></i></div>
+                <div class="alert-item__body"><div class="alert-item__title">PD Day — June 14</div><div class="alert-item__sub">All schools · attendance suspended · configured</div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+</body>
+</html>
